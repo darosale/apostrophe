@@ -92,6 +92,10 @@ import cuid from 'cuid';
 
 export default {
   props: {
+    empty: {
+      type: Boolean,
+      default: false
+    },
     contextOptions: {
       type: Object,
       required: true
@@ -125,7 +129,7 @@ export default {
         icon: 'plus-icon',
         type: 'primary',
         modifiers: [ 'round', 'tiny' ],
-        iconSize: 11
+        iconSize: this.empty ? 20 : 11
       }
     };
   },

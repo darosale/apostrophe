@@ -122,7 +122,6 @@ export default {
       this.open = false;
     },
     bind() {
-      console.log('get bound');
       document.addEventListener('click', this.clicks);
       document.addEventListener('keydown', this.keyboard);
       window.addEventListener('resize', this.positionPopup);
@@ -140,7 +139,6 @@ export default {
       }
     },
     clicks (event) {
-      console.log('i fire');
       // if user clicks outside menu component, close menu
       if (!this.$el.contains(event.target)) {
         this.close();

@@ -1,12 +1,20 @@
 <template>
   <div class="apos-area">
-    <AposAreaMenu
-      @add="insert"
-      v-bind:contextOptions="addContextOpts"
-      :index="0"
-      :widget-options="options.widgets"
-      :doc-id="docId"
-    />
+    <div 
+      v-if="next.length === 0"
+      class="apos-empty-area"
+    >
+      <AposEmptyState :empty-state="emptyState" />
+      <AposAreaMenu
+        @add="insert"
+        v-bind:contextOptions="addContextOpts"
+        :empty="true"
+        :index="0"
+        :widget-options="options.widgets"
+        :doc-id="docId"
+      />
+    </div>
+
     <div class="apos-areas-widgets-list">
       <div
         class="apos-area-widget-wrapper"
@@ -15,7 +23,7 @@
         :key="widget._id"
         @mouseover="handleMouseover(i)"
         @mouseleave="handleMouseleave(i)"
-        @click="handleFocus(i)"
+        @click="handleFocus($event, i)"
       >
         <div 
           class="apos-area-widget-controls apos-area-widget-controls--add"
@@ -135,13 +143,7 @@ export default {
   data() {
     const states = [];
     this.items.forEach((w, i) => {
-      states[i] = {
-        move: [],
-        modify: [],
-        container: [],
-        addTop: [],
-        addBottom: []
-      };
+      states[i] = this.createState();
     });
     return {
       next: this.items,
@@ -154,7 +156,10 @@ export default {
       addContextOpts: {
         autoPosition: false,
         menu: this.choices
-      }
+      },
+      emptyState: {
+        message: 'Add your content here'
+      },
     };
   },
   computed: {
@@ -209,17 +214,23 @@ export default {
     }
   },
   methods: {
+    createState() {
+      return {
+        move: [],
+        modify: [],
+        container: [],
+        addTop: [],
+        addBottom: []
+      };
+    },
     addOpen(i, who) {
-      console.log('iiiiiiii');
       const self = this.states[i][who];
       if (!self.includes(this.open)) {
         self.push(this.open);
       }
     },
     addClose(i, who) {
-      console.log('do i go');
       this.states[i][who] = this.states[i][who].filter(e => { return e !== this.open });
-      console.log(this.states[i][who]);
     },
     handleMouseover(i) {
       const self = this.states[i];
@@ -244,8 +255,10 @@ export default {
       // remove 
     },
 
-    handleFocus(i) {
+    handleFocus($event, i) {
+      $event.stopPropagation();
       const self = this.states[i];
+      console.log(this);
 
       // remove all other focus states
       for (let k in this.states) {
@@ -387,6 +400,7 @@ export default {
       if (this.widgetIsContextual(widget.type)) {
         this.edit(e.index);
       }
+      this.states.push(this.createState());
     },
     widgetComponent(type) {
       return this.moduleOptions.components.widgets[type];
@@ -425,10 +439,15 @@ export default {
 
 <style lang="scss" scoped>
 $offset-0: 10px;
-.apos-area {
-  /* margin: 5px;
-  padding: 5px;
-  border: 2px solid var(--a-brand-green); */
+.apos-empty-area {
+  display: flex;
+  padding: 30px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 50px;
+  background-color: var(--a-base-10);
+  border: 2px dotted var(--a-primary);
 }
 
 .apos-areas-widgets-list {
