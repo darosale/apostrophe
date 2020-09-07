@@ -16,84 +16,25 @@
     </div>
 
     <div class="apos-areas-widgets-list">
-      <div
-        class="apos-area-widget-wrapper"
-        :class="states[i].container"
+      <AposAreaWidget 
         v-for="(widget, i) in next"
         :key="widget._id"
-        @mouseover="handleMouseover(i)"
-        @mouseleave="handleMouseleave(i)"
-        @click="handleFocus($event, i)"
-      >
-        <div 
-          class="apos-area-widget-controls apos-area-widget-controls--add"
-          :class="states[i].addTop"
-          >
-          <AposAreaMenu
-            @add="insert"
-            @menuOpen="addOpen(i, 'addTop')"
-            @menuClose="addClose(i, 'addTop')"
-            v-bind:contextOptions="addContextOpts"
-            :index="i - 1"
-            :widget-options="options.widgets"
-            :doc-id="docId"
-          />
-        </div>
-        <div 
-          class="apos-area-widget-controls apos-area-widget-controls--move"
-          :class="states[i].move"
-        >
-          <AposWidgetMove
-            :first="i === 0"
-            :last="i === next.length - 1"
-            @up="up(i)"
-            @down="down(i)"
-          />
-        </div>
-        <div 
-          class="apos-area-widget-controls apos-area-widget-controls--modify"
-          :class="states[i].modify"
-        >
-          <AposWidgetModify
-            @remove="remove(i)"
-            @edit="edit(i)"
-          />
-        </div>
-        <component
-          v-if="editing[widget._id]"
-          @save="editing[widget._id] = false"
-          @close="editing[widget._id] = false"
-          :is="widgetEditorComponent(widget.type)"
-          :value="widget"
-          @update="update"
-          :options="options.widgets[widget.type]"
-          :type="widget.type"
-          :doc-id="docId"
-        />
-        <component
-          v-if="(!editing[widget._id]) || (!widgetIsContextual(widget.type))"
-          :is="widgetComponent(widget.type)"
-          :options="options.widgets[widget.type]"
-          :type="widget.type"
-          :doc-id="docId"
-          :id="widget._id"
-          :area-field-id="fieldId"
-          :value="widget"
-          @edit="edit(i)"
-        />
-        <div 
-          class="apos-area-widget-controls apos-area-widget-controls--add apos-area-widget-controls--add--bottom"
-          :class="states[i].addBottom"
-          >
-          <AposAreaMenu
-            @add="insert"
-            v-bind:contextOptions="addContextOpts"
-            :index="i + 1"
-            :widget-options="options.widgets"
-            :doc-id="docId"
-          />
-        </div>
-      </div>
+        :widget="widget"
+        :i="i"
+        :doc-id="docId"
+        :options="options"
+        :editing="editing"
+        :next="next"
+        :addContextOpts="addContextOpts"
+        :field-id="fieldId"
+        @up="up"
+        @down="down"
+        @remove="remove"
+        @edit="edit"
+        @update="update"
+        @insert="insert"
+        @supress="supress"
+      />
     </div>
   </div>
 </template>
@@ -141,22 +82,13 @@ export default {
   },
   emits: [ 'changed' ],
   data() {
-    const states = [];
-    this.items.forEach((w, i) => {
-      states[i] = this.createState();
-    });
     return {
-      next: this.items,
-      editing: {},
-      show: 'apos-show',
-      open: 'apos-open',
-      focus: 'apos-focus',
-      highlight: 'apos-highlight',
-      states,
       addContextOpts: {
         autoPosition: false,
         menu: this.choices
       },
+      next: this.items,
+      editing: {},
       emptyState: {
         message: 'Add your content here'
       },
@@ -214,82 +146,8 @@ export default {
     }
   },
   methods: {
-    createState() {
-      return {
-        move: [],
-        modify: [],
-        container: [],
-        addTop: [],
-        addBottom: []
-      };
-    },
-    addOpen(i, who) {
-      const self = this.states[i][who];
-      if (!self.includes(this.open)) {
-        self.push(this.open);
-      }
-    },
-    addClose(i, who) {
-      this.states[i][who] = this.states[i][who].filter(e => { return e !== this.open });
-    },
-    handleMouseover(i) {
-      const self = this.states[i];
-      // show move
-      if (!self.move.includes(this.show)) {
-        self.move.push(this.show);
-      }
-      // highlight widget container
-      if (!self.container.includes(this.highlight)) {
-        self.container.push(this.highlight);
-      }
-    },
-
-    handleMouseleave(i) {
-      const self = this.states[i];
-      // hide move controls
-      self.move = self.move.filter(i => { return i !== this.show });
-
-      // remove hover visual
-      self.container = self.container.filter(i => { return i !== this.highlight });
-
-      // remove 
-    },
-
-    handleFocus($event, i) {
-      $event.stopPropagation();
-      const self = this.states[i];
-      console.log(this);
-
-      // remove all other focus states
-      for (let k in this.states) {
-        this.states[k].container = this.states[k].container.filter(i => { return i !== this.focus });
-        this.states[k].modify = this.states[k].modify.filter(i => { return i !== this.show });
-        this.states[k].addTop = this.states[k].addTop.filter(i => { return i !== this.show });
-        this.states[k].addBottom = this.states[k].addBottom.filter(i => { return i !== this.show });
-        this.states[k].move = this.states[k].move.filter(i => { return i !== this.focus });
-      }
-
-      // show Modify controls
-      if (!self.modify.includes(this.show)) {
-        self.modify.push(this.show);
-      }
-
-      // add focus states
-      if (!self.container.includes(this.focus)) {
-        self.container.push(this.focus);
-      }
-      if (!self.move.includes(this.focus)) {
-        self.move.push(this.focus);
-      }
-
-      // show Add controls
-      if (!self.addBottom.includes(this.show)) {
-        self.addBottom.push(this.show);
-      }
-      if (!self.addTop.includes(this.show)) {
-        self.addTop.push(this.show);
-      }
-
+    supress() {
+      console.log('i heard supress');
     },
     async up(i) {
       if (this.docId) {
@@ -349,9 +207,11 @@ export default {
         ...this.next.slice(i + 1)
       ];
     },
+
     edit(i) {
       Vue.set(this.editing, this.next[i]._id, !this.editing[this.next[i]._id]);
     },
+
     async update(widget) {
       if (this.docId) {
         await apos.http.patch(`${apos.doc.action}/${this.docId}`, {
@@ -371,6 +231,7 @@ export default {
         this.editing[widget._id] = false;
       }
     },
+
     async insert(e) {
       const widget = e.widget;
       if (!widget._id) {
@@ -400,16 +261,6 @@ export default {
       if (this.widgetIsContextual(widget.type)) {
         this.edit(e.index);
       }
-      this.states.push(this.createState());
-    },
-    widgetComponent(type) {
-      return this.moduleOptions.components.widgets[type];
-    },
-    widgetEditorComponent(type) {
-      return this.moduleOptions.components.widgetEditors[type];
-    },
-    widgetIsContextual(type) {
-      return this.moduleOptions.widgetIsContextual[type];
     },
     // Recursively seek `subObject` within `object`, based on whether
     // its _id matches that of a sub-object of `object`. If found,
@@ -438,7 +289,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$offset-0: 10px;
 .apos-empty-area {
   display: flex;
   padding: 30px;
@@ -450,71 +300,8 @@ $offset-0: 10px;
   border: 2px dotted var(--a-primary);
 }
 
-.apos-areas-widgets-list {
-  min-height: 64px;
-}
+// .apos-areas-widgets-list {
+//   min-height: 64px;
+// }
 
-.apos-area-widget-wrapper {
-  position: relative;
-  min-height: 50px;
-  outline-offset: $offset-0;
-}
-
-.apos-highlight {
-  outline: 1px dotted var(--a-primary);
-}
-
-.apos-area-widget-wrapper.apos-focus {
-  z-index: $z-index-default;
-  outline: 1px solid var(--a-primary);
-}
-
-.apos-area-widget-controls {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-
-.apos-area-widget-controls--modify {
-  top: calc(-1 * #{$offset-0});
-  transform: translateY(-85%);
-}
-.apos-area-widget-controls--move {
-  top: 50%;
-  left: calc(-1 * #{$offset-0 + 5});
-  transform: translate3d(-100%, -50%, 0);
-}
-
-.apos-area-widget-controls--move.apos-focus {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.apos-area-widget-controls.apos-show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.apos-area-widget-controls--add {
-  top: 0;
-  left: 50%;
-  transform: translate3d(-50%, calc(-50% - #{$offset-0}), 0);
-}
-
-.apos-area-widget-controls--add.apos-open {
-  z-index: $z-index-default;
-}
-
-.apos-area-widget-controls--add--bottom {
-  top: auto;
-  bottom: 0;
-  transform: translate3d(-50%, calc(50% + #{$offset-0}), 0);
-}
-
-.apos-area /deep/ .apos-context-menu__popup.is-visible {
-  top: calc(100% + 20px);
-  left: 50%;
-  transform: translate(-50%, 0);
-}
 </style>
