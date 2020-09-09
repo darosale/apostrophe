@@ -1,8 +1,9 @@
 <template>
   <div class="apos-area-widget-wrapper">
+    {{ supressStatus }}
     <div
       class="apos-area-widget-inner"
-      :class="state.container"
+      :class="[state.container, { 'apos-supress': supressStatus }]"
       @mouseover="handleMouseover"
       @mouseleave="handleMouseleave"
       @click="handleFocus($event)"
@@ -15,13 +16,12 @@
           @add="insert"
           @menuOpen="focusMenu('addTop')"
           @menuClose="unfocusMenu('addTop')"
-          v-bind:contextOptions="addContextOpts"
-          :index="i - 1"
+          :context-options="contextOptions"
+          :index="i"
           :widget-options="options.widgets"
-          :doc-id="docId"
         />
       </div>
-      <div 
+      <div
         class="apos-area-widget-controls apos-area-widget-controls--move"
         :class="state.move"
       >
@@ -32,7 +32,7 @@
           @down="down(i)"
         />
       </div>
-      <div 
+      <div
         class="apos-area-widget-controls apos-area-widget-controls--modify"
         :class="state.modify"
       >
@@ -50,14 +50,12 @@
         @update="update"
         :options="options.widgets[widget.type]"
         :type="widget.type"
-        :doc-id="docId"
       />
       <component
         v-if="(!editing[widget._id]) || (!widgetIsContextual(widget.type))"
         :is="widgetComponent(widget.type)"
         :options="options.widgets[widget.type]"
         :type="widget.type"
-        :doc-id="docId"
         :id="widget._id"
         :area-field-id="fieldId"
         :value="widget"
@@ -69,10 +67,9 @@
         >
         <AposAreaMenu
           @add="insert"
-          v-bind:contextOptions="addContextOpts"
+          :context-options="contextOptions"
           :index="i + 1"
           :widget-options="options.widgets"
-          :doc-id="docId"
           @menuOpen="focusMenu('addBottom')"
           @menuClose="unfocusMenu('addBottom')"
         />
@@ -110,13 +107,13 @@ export default {
       type: String,
       required: true
     },
-    docId: {
-      type: String,
-      default: null
-    },
-    addContextOpts: {
+    contextOptions: {
       type: Object,
       required: true
+    },
+    supressStatus: {
+      type: Boolean,
+      default: false
     }
   },
   emits: [ 'changed' ],
@@ -149,7 +146,7 @@ export default {
     handleMouseover() {
       this.showMove();
       this.highlightContainer();
-      // this.$emit('supress');
+      this.$emit('supress');
     },
 
     handleMouseleave() {
@@ -175,7 +172,7 @@ export default {
     },
 
     // ACTIONS
-    //////////////////  
+    //////////////////
 
     toggleSupress() {
       if (this.state.container.includes(this.supress)) {
@@ -196,7 +193,7 @@ export default {
     showMove() {
       this.addClass(this.state.move, this.show);
     },
-    
+
     removeMove() {
       this.state.move = this.removeClass(this.state.move, this.show);
     },
@@ -274,9 +271,8 @@ export default {
 
     // filter class off array
     removeClass(what, c) {
-      return what.filter(i => { return i !== c });
+      return what.filter(i => { return i !== c; });
     },
-
 
     // events to emit
     up(i) {
@@ -305,7 +301,7 @@ export default {
     },
     widgetIsContextual(type) {
       return this.moduleOptions.widgetIsContextual[type];
-    },
+    }
   }
 };
 </script>

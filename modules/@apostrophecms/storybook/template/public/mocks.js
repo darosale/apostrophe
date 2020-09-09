@@ -23,10 +23,8 @@
           group: 'AposInputGroup',
           array: 'AposInputArray',
           object: 'AposInputObject',
-          joinByOne: 'AposInputJoinByOne',
-          joinByOneReverse: 'AposInputJoinByOneReverse',
-          joinByArray: 'AposInputJoinByArray',
-          joinByArrayReverse: 'AposInputJoinByArrayReverse',
+          relationship: 'AposInputRelationship',
+          relationshipReverse: 'AposInputRelationshipReverse',
           attachment: 'AposInputAttachment',
           video: 'AposInputVideo'
         }
@@ -221,7 +219,7 @@
         managerModal: 'AposPiecesManager'
       }
     },
-    image: {
+    '@apostrophecms/image': {
       name: '@apostrophecms/image',
       label: 'Image',
       pluralLabel: 'Images',
@@ -275,7 +273,7 @@
           _id: 'e146d8acff60cc41f257d010b61e277b'
         },
         {
-          type: 'join',
+          type: 'relationship',
           name: '_tags',
           label: 'Tags',
           withType: '@apostrophecms/image-tag',
@@ -283,7 +281,7 @@
             name: 'basics',
             label: 'Basics'
           },
-          idsField: 'tagsIds',
+          idsStorage: 'tagsIds',
           _id: '885071da9d576801a81f133f5c58b9a1'
         },
         {
@@ -425,6 +423,60 @@
         managerModal: 'AposMediaManager'
       },
       alias: 'image'
+    },
+    '@apostrophecms/attachment': {
+      action: '/api/v1/@apostrophecms/attachment',
+      fileGroups: [
+        {
+          name: 'images',
+          label: 'Images',
+          extensions: [
+            'gif',
+            'jpg',
+            'png'
+          ],
+          extensionMaps: {
+            jpeg: 'jpg'
+          },
+          image: true
+        },
+        {
+          name: 'office',
+          label: 'Office',
+          extensions: [
+            'txt',
+            'rtf',
+            'pdf',
+            'xls',
+            'ppt',
+            'doc',
+            'pptx',
+            'sldx',
+            'ppsx',
+            'potx',
+            'xlsx',
+            'xltx',
+            'csv',
+            'docx',
+            'dotx'
+          ],
+          extensionMaps: {},
+          image: false
+        }
+      ],
+      name: 'attachment',
+      uploadsUrl: '/uploads',
+      croppable: {
+        gif: true,
+        jpg: true,
+        png: true
+      },
+      sized: {
+        gif: true,
+        jpg: true,
+        png: true
+      },
+      alias: 'attachment'
     }
   };
 
@@ -556,6 +608,9 @@
 
   apos.http.postResponses = {
     '/api/v1/products': {
+      status: 200
+    },
+    '/api/v1/image-upload-mock': {
       status: 200
     }
   };

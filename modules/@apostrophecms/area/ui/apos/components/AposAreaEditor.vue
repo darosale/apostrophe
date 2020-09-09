@@ -1,39 +1,37 @@
 <template>
   <div class="apos-area">
-    <div 
+    <div
       v-if="next.length === 0"
       class="apos-empty-area"
     >
       <AposEmptyState :empty-state="emptyState" />
       <AposAreaMenu
         @add="insert"
-        v-bind:contextOptions="addContextOpts"
+        :context-options="contextOptions"
         :empty="true"
         :index="0"
         :widget-options="options.widgets"
-        :doc-id="docId"
       />
     </div>
-
     <div class="apos-areas-widgets-list">
-      <AposAreaWidget 
+      <AposAreaWidget
         v-for="(widget, i) in next"
         :key="widget._id"
         :widget="widget"
         :i="i"
-        :doc-id="docId"
         :options="options"
         :editing="editing"
         :next="next"
-        :addContextOpts="addContextOpts"
+        :context-options="contextOptions"
         :field-id="fieldId"
+        :supress-status="supressStatus[i]"
         @up="up"
         @down="down"
         @remove="remove"
         @edit="edit"
         @update="update"
         @insert="insert"
-        @supress="supress"
+        @supress="updateSupress(i)"
       />
     </div>
   </div>
@@ -47,10 +45,6 @@ import cuid from 'cuid';
 export default {
   name: 'AposAreaEditor',
   props: {
-    docId: {
-      type: String,
-      default: null
-    },
     docType: {
       type: String,
       default: null
@@ -82,8 +76,13 @@ export default {
   },
   emits: [ 'changed' ],
   data() {
+    const supressStatus = [];
+    this.items.forEach((item, index) => {
+      supressStatus[index] = false;
+    });
     return {
-      addContextOpts: {
+      supressStatus,
+      contextOptions: {
         autoPosition: false,
         menu: this.choices
       },
@@ -91,7 +90,7 @@ export default {
       editing: {},
       emptyState: {
         message: 'Add your content here'
-      },
+      }
     };
   },
   computed: {
@@ -146,8 +145,25 @@ export default {
     }
   },
   methods: {
+    updateSupress(i) {
+      console.log('updating');
+      // this.supressStatus[i] = !this.supressStatus[i]
+      console.log(i);
+      this.supressStatus.forEach((s, index) => {
+        if (i !== index) {
+          this.supressStatus[i] = !this.supressStatus[i];
+          s = !s;
+          // console.log(s);
+        }
+      });
+      console.log(this.supressStatus);
+    },
     supress() {
-      console.log('i heard supress');
+      this.$emit('supress');
+    },
+
+    widgetIsContextual(type) {
+      return this.moduleOptions.widgetIsContextual[type];
     },
     async up(i) {
       if (this.docId) {
@@ -240,6 +256,8 @@ export default {
       const push = {
         $each: [ widget ]
       };
+      console.log(e);
+      console.log(e.index);
       if (e.index < this.next.length) {
         push.$before = this.next[e.index]._id;
       }

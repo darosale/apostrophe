@@ -81,7 +81,6 @@
       @close="close"
       @insert="insert"
       :options="addWidgetOptions"
-      :doc-id="docId"
     />
   </div>
 </template>
@@ -106,10 +105,6 @@ export default {
     },
     widgetOptions: {
       type: Object,
-      required: true
-    },
-    docId: {
-      type: String,
       required: true
     }
   },
@@ -141,8 +136,8 @@ export default {
       return {
         tipAlignment: 'center',
         ...this.contextOptions,
-        modifiers: ['unpadded'],
-      }
+        modifiers: [ 'unpadded' ]
+      };
     },
     groupedMenus() {
       let flag = false;

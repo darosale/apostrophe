@@ -52,7 +52,7 @@ module.exports = {
         label: 'Credit URL'
       },
       _tags: {
-        type: 'join',
+        type: 'relationship',
         label: 'Tags',
         withType: '@apostrophecms/image-tag'
       }
@@ -78,6 +78,17 @@ module.exports = {
       }
     }
   },
+  extendRestApiRoutes: (self, options) => ({
+    async getAll (_super, req) {
+      const pieces = await _super(req);
+
+      self.apos.attachment.all(pieces, {
+        annotate: true
+      });
+
+      return pieces;
+    }
+  }),
   methods(self, options) {
     return {
       // This method is available as a template helper: apos.image.first
@@ -87,7 +98,7 @@ module.exports = {
       //
       // For best performance be reasonably specific; don't pass an entire page or piece
       // object if you can pass page.thumbnail to avoid an exhaustive search, especially
-      // if the page has many joins.
+      // if the page has many relationships.
       //
       // For ease of use, a null or undefined `within` argument is accepted.
       //
@@ -124,7 +135,7 @@ module.exports = {
       //
       // For best performance be reasonably specific; don't pass an entire page or piece
       // object if you can pass page.thumbnail to avoid an exhaustive search, especially
-      // if the page has many joins.
+      // if the page has many relationships.
       //
       // When available, the `_description`, `_credit` and `_creditUrl` are
       // also returned as part of the object.
@@ -160,7 +171,7 @@ module.exports = {
       //
       // Given an image attachment, return a string that can be used as the value
       // of a `srcset` HTML attribute.
-      srcset(attachment, cropRelationship) {
+      srcset(attachment, cropFields) {
         if (!self.apos.attachment.isSized(attachment)) {
           return '';
         }
@@ -178,7 +189,7 @@ module.exports = {
         }).map(function (imageSize) {
           const src = self.apos.attachment.url(attachment, {
             size: imageSize.name,
-            crop: cropRelationship
+            crop: cropFields
           });
           const width = Math.min(imageSize.width, attachment.width);
           return src + ' ' + width + 'w';
