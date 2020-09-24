@@ -219,6 +219,13 @@
         managerModal: 'AposPiecesManager'
       }
     },
+    '@apostrophecms/page': {
+      label: 'Page',
+      pluralLabel: 'Pages',
+      components: {
+        managerModal: 'AposPagesManager'
+      }
+    },
     '@apostrophecms/image': {
       name: '@apostrophecms/image',
       label: 'Image',

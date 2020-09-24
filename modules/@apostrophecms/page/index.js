@@ -81,6 +81,7 @@ module.exports = {
       // that method
       return self.unparkTask();
     });
+
     self.validateTypeChoices();
     self.finalizeControls();
     self.addPermissions();

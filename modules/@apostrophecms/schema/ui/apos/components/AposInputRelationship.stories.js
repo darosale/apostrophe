@@ -107,6 +107,49 @@ export const mediaRelationship = () => {
   };
 };
 
+export const pageRelationship = () => {
+
+  const max = select(
+    'Limit', {
+      None: null,
+      One: 1,
+      Two: 2,
+      Three: 3
+    },
+    null
+  );
+
+  const isDisabled = boolean('Is Disabled?', false);
+
+  return {
+    components: { AposInputRelationship },
+    data () {
+      return {
+        field: {
+          name: 'pageJoin',
+          label: 'Choose pages(s) to list',
+          help: 'Choose page(s)',
+          type: 'join',
+          withType: '@apostrophecms/page',
+          max
+        },
+        value: {
+          data: []
+        },
+        status: {
+          disabled: isDisabled
+        }
+      };
+    },
+    template: `
+      <AposInputRelationship
+        :field="field"
+        :value="value"
+        :status="status"
+      />`
+  };
+};
+
 function getData(n) {
   const data = [
     {
