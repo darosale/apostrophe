@@ -4,7 +4,18 @@
     @esc="cancel" @no-modal="$emit('safe-close')"
     @inactive="modal.active = false" @show-modal="modal.showModal = true"
   >
-    <template #primaryControls>
+    <template v-if="relationshipField" #primaryControls>
+      <AposButton
+        type="default" label="Cancel"
+        @click="cancel"
+      />
+      <AposButton
+        :label="`Save`" type="primary"
+        :disabled="relationshipErrors === 'min'"
+        @click="saveRelationship"
+      />
+    </template>
+    <template v-else #primaryControls>
       <AposButton
         type="default" label="Finished"
         @click="cancel"
@@ -25,7 +36,7 @@
         </template>
         <template #bodyMain>
           <AposTree
-            :items="items"
+            :items="treeFormatted"
             :headers="headers" :icons="icons"
             v-model="checked"
             :options="treeOptions"
@@ -54,9 +65,10 @@ export default {
         type: 'slide',
         showModal: false
       },
-      pages: [],
-      pagesFlat: [],
+      pageTree: [],
+      items: [],
       checked: [],
+      // TODO: Get columns from module's browser data.
       options: {
         columns: [
           {
@@ -85,21 +97,24 @@ export default {
             type: 'link'
           }
         ]
-      },
-      treeOptions: {
-        bulkSelect: true,
-        draggable: true
       }
     };
   },
   computed: {
-    items() {
-      const items = [];
-      if (!this.pages || !this.headers.length) {
+    treeOptions() {
+      return {
+        bulkSelect: true,
+        draggable: true,
+        disableUnchecked: this.relationshipErrors === 'max'
+      };
+    },
+    treeFormatted() {
+      const formatted = [];
+      if (!this.pageTree || !this.headers.length) {
         return [];
       }
 
-      const pagesSet = klona(this.pages);
+      const pagesSet = klona(this.pageTree);
 
       pagesSet.forEach(page => {
         const data = {};
@@ -109,21 +124,10 @@ export default {
           data._id = page._id;
           data.children = page.children;
         });
-        items.push(data);
+        formatted.push(data);
       });
 
-      return items;
-    },
-    selectAllChoice() {
-      const checkLen = this.checked.length;
-      const rowLen = this.pagesFlat.length;
-
-      return checkLen > 0 && checkLen !== rowLen ? {
-        value: 'checked',
-        indeterminate: true
-      } : {
-        value: 'checked'
-      };
+      return formatted;
     }
   },
   async mounted() {
@@ -134,11 +138,11 @@ export default {
   },
   methods: {
     async getPages () {
-      this.pages = [];
-      this.pagesFlat = [];
+      this.pageTree = [];
+      this.items = [];
       const self = this;
 
-      const pageTree = (await apos.http.get(
+      const results = (await apos.http.get(
         '/api/v1/@apostrophecms/page', {
           busy: true,
           qs: {
@@ -147,15 +151,15 @@ export default {
         }
       )).results;
 
-      formatPage(pageTree);
+      formatPage(results);
 
-      this.pages = [ pageTree ];
+      this.pageTree = [ results ];
 
       function formatPage(page) {
         page.published = page.published ? 'Published' : 'Unpublished';
-        self.pagesFlat.push({
+        self.items.push({
           title: page.title,
-          id: page._id
+          _id: page._id
         });
 
         page.children = page._children;
@@ -172,20 +176,6 @@ export default {
     },
     setBusy(val) {
       apos.bus.$emit('busy', val);
-    },
-    selectAll(event) {
-      if (!this.checked.length) {
-        this.pagesFlat.forEach((row) => {
-          this.toggleRowCheck(row.id);
-        });
-        return;
-      }
-
-      if (this.checked.length <= this.pagesFlat.length) {
-        this.checked.forEach((id) => {
-          this.toggleRowCheck(id);
-        });
-      }
     },
     trashClick() {
       // TODO: Trigger a confirmation modal and execute the deletion.

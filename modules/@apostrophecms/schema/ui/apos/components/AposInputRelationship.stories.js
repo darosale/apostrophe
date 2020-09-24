@@ -139,6 +139,15 @@ export const pageRelationship = () => {
     null
   );
 
+  const min = select(
+    'Minimum', {
+      None: null,
+      One: 1,
+      Two: 2
+    },
+    null
+  );
+
   const isDisabled = boolean('Is Disabled?', false);
 
   return {
@@ -151,6 +160,7 @@ export const pageRelationship = () => {
           help: 'Choose page(s)',
           type: 'join',
           withType: '@apostrophecms/page',
+          min,
           max
         },
         value: {

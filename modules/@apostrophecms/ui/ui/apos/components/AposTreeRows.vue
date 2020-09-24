@@ -53,7 +53,8 @@
                 name: row._id,
                 hideLabel: true,
                 label: `Toggle selection of ${row.title}`,
-                disableFocus: true
+                disableFocus: true,
+                disabled: options.disableUnchecked && !checked.includes(row._id)
               }"
               :choice="{ value: row._id }"
               v-model="checkedProxy"

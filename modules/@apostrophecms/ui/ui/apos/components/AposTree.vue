@@ -67,6 +67,7 @@ export default {
     // - bulkSelect: Rows can be bulk selected using checkboxes. Both this
     //   and `selectable` use the same `checked` array.
     // - draggable: Rows can be moved around within the tree.
+    // - disableUnchecked: If truthy, disable checkboxes not already checked.
     options: {
       type: Object,
       default () {
