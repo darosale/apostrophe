@@ -38,62 +38,27 @@
       <div
         v-for="(widget, i) in next"
         :key="widget._id"
-      >
-        <draggable
-          :list="next"
-          v-bind="{
-            animation: 0,
-            sort: false,
-            handle: '[data-move]',
-            group: {
-              name: areaId,
-              put: [ areaId ]
-            }
-          }"
-          @start="isDragging=true"
-          @end="isDragging=false"
-          id="fdf"
-        >
-          <AposAreaWidget
-            :area-id="areaId"
-            :widget="widget"
-            :i="i"
-            :editing="editing[widget._id] || false"
-            :options="options"
-            :next="next"
-            :doc-id="docId"
-            :context-menu-options="contextMenuOptions"
-            :field-id="fieldId"
-            :widget-hovered="hoveredWidget"
-            :widget-focused="focusedWidget"
-            :max-reached="maxReached"
-            @done="done"
-            @up="up"
-            @down="down"
-            @remove="remove"
-            @edit="edit"
-            @close="close"
-            @update="update"
-            @insert="insert"
-          />
-        </draggable>
-        <draggable
-          :list="[]"
-          v-bind="{
-            animation: 0,
-            handle: '[data-move]',
-            group: {
-              name: areaId,
-              put: [ areaId ]
-            }
-          }"
-          @start="isDragging=true"
-          @end="isDragging=false"
-          id="fdf"
-        >
-          <div class="drop" />
-        </draggable>
-      </div>
+        :widget="widget"
+        :i="i"
+        :editing="editing[widget._id] || false"
+        :options="options"
+        :next="next"
+        :doc-id="docId"
+        :context-menu-options="contextMenuOptions"
+        :field-id="fieldId"
+        :widget-hovered="hoveredWidget"
+        :widget-focused="focusedWidget"
+        :max-reached="maxReached"
+        @done="done"
+        @up="up"
+        @down="down"
+        @remove="remove"
+        @edit="edit"
+        @clone="clone"
+        @close="close"
+        @update="update"
+        @insert="insert"
+      />
     </div>
   </div>
 </template>
@@ -102,7 +67,11 @@
 
 import Vue from 'apostrophe/vue';
 import cuid from 'cuid';
+<<<<<<< HEAD
 import draggable from 'vuedraggable';
+=======
+import klona from 'klona';
+>>>>>>> 3304c1f7b82eda0decacdb7f280a956bd1a78cff
 
 export default {
   name: 'AposAreaEditor',
@@ -297,6 +266,14 @@ export default {
     },
     edit(i) {
       Vue.set(this.editing, this.next[i]._id, !this.editing[this.next[i]._id]);
+    },
+    clone(index) {
+      const widget = klona(this.next[index]);
+      delete widget._id;
+      this.insert({
+        widget,
+        index
+      });
     },
     async update(widget) {
       if (this.docId) {
