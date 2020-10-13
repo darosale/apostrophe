@@ -6,7 +6,7 @@
         :disabled="first"
         @click="up"
       />
-      <AposButton v-bind="dragButton" />
+      <AposButton v-bind="dragButton" data-move />
       <AposButton
         v-bind="downButton"
         :disabled="last"

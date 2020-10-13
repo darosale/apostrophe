@@ -1,5 +1,25 @@
 <template>
   <div :data-apos-area="areaId" class="apos-area">
+    <!-- <div>
+      <h3>Stu's world</h3>
+      <draggable
+        class="apos-slat-list"
+        tag="ol"
+        role="list"
+        :list="dumb"
+        v-bind="dragOptions"
+        @start="isDragging=true"
+        @end="isDragging=false"
+        id="erdddfwefu"
+      >
+        <div
+          v-for="item in dumb"
+          :key="item._id"
+        >
+          {{ item.name }}
+        </div>
+      </draggable>
+    </div> -->
     <div
       v-if="next.length === 0"
       class="apos-empty-area"
@@ -14,31 +34,66 @@
         :max-reached="maxReached"
       />
     </div>
-    <div class="apos-areas-widgets-list">
-      <AposAreaWidget
+    <div class="apos-areas-widgets-list" :class="{'dragging': isDragging }">
+      <div
         v-for="(widget, i) in next"
-        :area-id="areaId"
         :key="widget._id"
-        :widget="widget"
-        :i="i"
-        :editing="editing[widget._id] || false"
-        :options="options"
-        :next="next"
-        :doc-id="docId"
-        :context-menu-options="contextMenuOptions"
-        :field-id="fieldId"
-        :widget-hovered="hoveredWidget"
-        :widget-focused="focusedWidget"
-        :max-reached="maxReached"
-        @done="done"
-        @up="up"
-        @down="down"
-        @remove="remove"
-        @edit="edit"
-        @close="close"
-        @update="update"
-        @insert="insert"
-      />
+      >
+        <draggable
+          :list="next"
+          v-bind="{
+            animation: 0,
+            sort: false,
+            handle: '[data-move]',
+            group: {
+              name: areaId,
+              put: [ areaId ]
+            }
+          }"
+          @start="isDragging=true"
+          @end="isDragging=false"
+          id="fdf"
+        >
+          <AposAreaWidget
+            :area-id="areaId"
+            :widget="widget"
+            :i="i"
+            :editing="editing[widget._id] || false"
+            :options="options"
+            :next="next"
+            :doc-id="docId"
+            :context-menu-options="contextMenuOptions"
+            :field-id="fieldId"
+            :widget-hovered="hoveredWidget"
+            :widget-focused="focusedWidget"
+            :max-reached="maxReached"
+            @done="done"
+            @up="up"
+            @down="down"
+            @remove="remove"
+            @edit="edit"
+            @close="close"
+            @update="update"
+            @insert="insert"
+          />
+        </draggable>
+        <draggable
+          :list="[]"
+          v-bind="{
+            animation: 0,
+            handle: '[data-move]',
+            group: {
+              name: areaId,
+              put: [ areaId ]
+            }
+          }"
+          @start="isDragging=true"
+          @end="isDragging=false"
+          id="fdf"
+        >
+          <div class="drop" />
+        </draggable>
+      </div>
     </div>
   </div>
 </template>
@@ -47,9 +102,13 @@
 
 import Vue from 'apostrophe/vue';
 import cuid from 'cuid';
+import draggable from 'vuedraggable';
 
 export default {
   name: 'AposAreaEditor',
+  components: {
+    draggable
+  },
   props: {
     docId: {
       type: String,
@@ -104,10 +163,23 @@ export default {
       },
       emptyState: {
         message: 'Add your content here'
-      }
+      },
+      isDragging: false
     };
   },
   computed: {
+    dragOptions() {
+      return {
+        animation: 0,
+        sort: false,
+        handle: '[data-move]',
+        group: {
+          name: this.areaId,
+          put: [ this.areaId ]
+        }
+        // disabled: true
+      };
+    },
     moduleOptions() {
       return window.apos.area;
     },
@@ -318,18 +390,51 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.apos-empty-area {
-  display: flex;
-  padding: 30px;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  min-height: 50px;
-  background-color: var(--a-base-10);
-  border: 2px dotted var(--a-primary);
-}
+  // .is-dragging {
+  //   outline: 5px solid var(--a-primary);
+  // }
+  // .sortable-drag {
+  //   outline: 5px solid var(--a-danger);
+  // }
+  .sortable-chosen {
+    // outline: 5px solid var(--a-warning);
+    // opacity: 0;
+  }
+  .sortable-ghost {
+    opacity: 1;
+    // border: 5px solid var(--a-success);
+  }
+  .dragging .drop {
+    opacity: 0.4;
+  }
+  .drop {
+    height: 10px;
+    margin: 5px 0;
+    padding: 20px;
+    background-color: var(--a-base-4);
+    border: 2px solid var(--a-primary);
+  }
+  .apos-empty-area {
+    display: flex;
+    padding: 30px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 50px;
+    background-color: var(--a-base-10);
+    border: 2px dotted var(--a-primary);
+  }
 
-.apos-area-widget-wrapper {
-  position: relative;
-}
+  .apos-area-widget-wrapper {
+    position: relative;
+  }
+
+  .apos-flip-list-leave-to {
+    opacity: 0;
+  }
+
+  .is-dragging {
+    opacity: 0.5;
+    background: var(--a-base-4);
+  }
 </style>
