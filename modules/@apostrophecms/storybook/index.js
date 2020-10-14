@@ -68,7 +68,7 @@ module.exports = {
         // Currently tiptap has npm install problems that are not worth fighting for storybook
         // https://github.com/ueberdosis/tiptap/issues/760
         // adding prosemirror-tables: ^0.9.x did not help unfortunately
-        importsCode = importsCode.replace(/import Apos(trophe)?RichTextWidgetEditor from [^;]*;/, '');
+        importsCode = importsCode.replace(/import AposRichTextWidgetEditor from [^;]*;/, '');
         componentsCode = componentsCode.replace(/Vue.component\("Apos(trophe)?RichTextWidgetEditor", Apos(trophe)?RichTextWidgetEditor\);/, '');
         const preview = previewTemplate
           .replace(IMPORTS_PLACEHOLDER, importsCode)

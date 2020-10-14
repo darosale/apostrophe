@@ -1,25 +1,6 @@
+/* stylelint-disable */
 <template>
   <div :data-apos-area="areaId" class="apos-area">
-    <!-- <div>
-      <h3>Stu's world</h3>
-      <draggable
-        class="apos-slat-list"
-        tag="ol"
-        role="list"
-        :list="dumb"
-        v-bind="dragOptions"
-        @start="isDragging=true"
-        @end="isDragging=false"
-        id="erdddfwefu"
-      >
-        <div
-          v-for="item in dumb"
-          :key="item._id"
-        >
-          {{ item.name }}
-        </div>
-      </draggable>
-    </div> -->
     <div
       v-if="next.length === 0"
       class="apos-empty-area"
@@ -34,31 +15,50 @@
         :max-reached="maxReached"
       />
     </div>
-    <div class="apos-areas-widgets-list" :class="{'dragging': isDragging }">
-      <div
-        v-for="(widget, i) in next"
-        :key="widget._id"
-        :widget="widget"
-        :i="i"
-        :editing="editing[widget._id] || false"
-        :options="options"
-        :next="next"
-        :doc-id="docId"
-        :context-menu-options="contextMenuOptions"
-        :field-id="fieldId"
-        :widget-hovered="hoveredWidget"
-        :widget-focused="focusedWidget"
-        :max-reached="maxReached"
-        @done="done"
-        @up="up"
-        @down="down"
-        @remove="remove"
-        @edit="edit"
-        @clone="clone"
-        @close="close"
-        @update="update"
-        @insert="insert"
-      />
+    <div
+      class="apos-areas-widgets-list"
+      :class="{'is-dragging': isDragging }"
+    >
+      <draggable
+        class="apos-slat-list"
+        tag="div"
+        role="list"
+        :list="next"
+        @start="dragStart"
+        @end="dragEnd"
+        id="weln"
+        handle="[data-drag]"
+        :group="{
+          name: 'hiii',
+          pull: true,
+          put: true
+        }"
+      >
+        <AposAreaWidget
+          v-for="(widget, i) in next"
+          :key="i"
+          :area-id="areaId"
+          :widget="widget"
+          :i="i"
+          :editing="editing[widget._id] || false"
+          :options="options"
+          :next="next"
+          :doc-id="docId"
+          :context-menu-options="contextMenuOptions"
+          :field-id="fieldId"
+          :widget-hovered="hoveredWidget"
+          :widget-focused="focusedWidget"
+          :max-reached="maxReached"
+          @done="done"
+          @up="up"
+          @down="down"
+          @remove="remove"
+          @edit="edit"
+          @close="close"
+          @update="update"
+          @insert="insert"
+        />
+      </draggable>
     </div>
   </div>
 </template>
@@ -67,11 +67,8 @@
 
 import Vue from 'apostrophe/vue';
 import cuid from 'cuid';
-<<<<<<< HEAD
 import draggable from 'vuedraggable';
-=======
 import klona from 'klona';
->>>>>>> 3304c1f7b82eda0decacdb7f280a956bd1a78cff
 
 export default {
   name: 'AposAreaEditor',
@@ -200,6 +197,12 @@ export default {
     }
   },
   methods: {
+    dragStart() {
+      this.isDragging = true;
+    },
+    dragEnd() {
+      this.isDragging = false;
+    },
     updateWidgetHovered(widgetId) {
       this.hoveredWidget = widgetId;
     },
@@ -367,29 +370,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  // .is-dragging {
-  //   outline: 5px solid var(--a-primary);
-  // }
-  // .sortable-drag {
-  //   outline: 5px solid var(--a-danger);
-  // }
-  .sortable-chosen {
-    // outline: 5px solid var(--a-warning);
-    // opacity: 0;
-  }
-  .sortable-ghost {
-    opacity: 1;
-    // border: 5px solid var(--a-success);
-  }
-  .dragging .drop {
-    opacity: 0.4;
-  }
-  .drop {
-    height: 10px;
+  .apos-drop-indicator {
     margin: 5px 0;
-    padding: 20px;
-    background-color: var(--a-base-4);
-    border: 2px solid var(--a-primary);
+    opacity: 0;
+    transition: all 0.2s ease;
+    background-color: var(--a-primary);
+  }
+
+  .is-dragging .apos-drop-indicator {
+    opacity: 0.3;
+    height: 10px;
+    margin: 0;
   }
   .apos-empty-area {
     display: flex;
@@ -406,12 +397,13 @@ export default {
     position: relative;
   }
 
-  .apos-flip-list-leave-to {
-    opacity: 0;
+  .apos-areas-widgets-list {
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    margin-bottom: 0;
   }
 
-  .is-dragging {
-    opacity: 0.5;
-    background: var(--a-base-4);
-  }
 </style>
+
+/* stylelint-enable */
