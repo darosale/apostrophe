@@ -1,4 +1,4 @@
-FROM ${nodebase}
+FROM ${testing}
 
 COPY . /opt/app-root/src/content-mgmt-ui
 
