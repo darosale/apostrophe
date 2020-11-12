@@ -1,0 +1,14 @@
+FROM ${nodebase}
+
+COPY . /opt/app-root/src/content-mgmt-ui
+
+ENV  NODE_ENV=${DOCKER_NODE_ENV}\
+	 EXECUTION_ENVIRONMENT=${DOCKER_EXECUTION_ENVIRONMENT}\
+	 PORT="4500"\
+     LOG4JS_LEVEL=${DOCKER_LOG4JS_LEVEL}
+
+EXPOSE 4500
+
+WORKDIR /opt/app-root/src/content-mgmt-ui
+
+CMD ["/bin/bash", "-c", "sleep 10; npm start"]
